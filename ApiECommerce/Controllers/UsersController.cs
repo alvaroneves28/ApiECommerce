@@ -19,6 +19,7 @@ namespace ApiECommerce.Controllers
     {
         private readonly AppDbContext dbContext;
         private readonly IConfiguration _config;
+        
 
         public UsersController(AppDbContext dbContext, IConfiguration config)
         {
@@ -136,7 +137,7 @@ namespace ApiECommerce.Controllers
                 .Where(x => x.Email == userEmail)
                 .Select(x => new
                 {
-                    x.UrlImage,
+                    x.Image,
                 })
                 .SingleOrDefaultAsync();
 

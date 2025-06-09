@@ -70,6 +70,12 @@ namespace ApiECommerce.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] Order order)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(new { errors });
+            }
+
             order.OrderDate = DateTime.Now;
 
             var basketItems = await dbContext.BasketItems
@@ -111,10 +117,12 @@ namespace ApiECommerce.Controllers
 
                     return Ok(new { OrderId = order.Id });
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    return BadRequest("Error processing your request");
+
+                    var baseException = ex.GetBaseException();
+                    return BadRequest(new { error = baseException.Message });
                 }
         
     }

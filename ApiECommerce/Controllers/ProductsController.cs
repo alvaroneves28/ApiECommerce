@@ -6,8 +6,11 @@ using Microsoft.Identity.Client;
 
 namespace ApiECommerce.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class ProductsController : Controller
     {
+
         private readonly IProductRepository _productRepository;
 
         public ProductsController(IProductRepository productRepository)
