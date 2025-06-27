@@ -6,10 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ApiECommerce.Controllers
 {
@@ -19,7 +17,7 @@ namespace ApiECommerce.Controllers
     {
         private readonly AppDbContext dbContext;
         private readonly IConfiguration _config;
-        
+
 
         public UsersController(AppDbContext dbContext, IConfiguration config)
         {
@@ -72,12 +70,12 @@ namespace ApiECommerce.Controllers
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return new ObjectResult(new
+            return new JsonResult(new Dictionary<string, object>
             {
-                access_toen = jwt,
-                token_type = "bearer",
-                user_id = actualUser.Id,
-                user_name = actualUser.Name
+                { "accesstoken", jwt },
+                { "tokentype", "bearer" },
+                { "userid", actualUser.Id },
+                { "username", actualUser.Name }
             });
         }
 
@@ -98,7 +96,7 @@ namespace ApiECommerce.Controllers
                 return BadRequest("No image was sent.");
             }
 
-            // Certifica-te de que a pasta existe
+
             var imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "userimages");
             if (!Directory.Exists(imageFolder))
             {
@@ -122,7 +120,7 @@ namespace ApiECommerce.Controllers
 
 
         [Authorize]
-        [HttpGet("profileimage")]
+        [HttpGet("UserProfileImage")]
         public async Task<IActionResult> UserProfileImage()
         {
             //verifica se o usuário esta autenticado
@@ -144,6 +142,23 @@ namespace ApiECommerce.Controllers
             return Ok(imagemPerfil);
         }
 
-      
+        [HttpGet("All")]
+        [AllowAnonymous] 
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await dbContext.Users
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Email,
+                    u.Name,
+                    u.Contact,
+                })
+                .ToListAsync();
+
+            return Ok(users);
+        }
+
+
     }
 }

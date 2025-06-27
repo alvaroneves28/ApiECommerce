@@ -32,9 +32,9 @@ namespace ApiECommerce.Controllers
                                        select new
                                        {
                                            Id = s.Id,
-                                           Preco = s.UnitPrice,
-                                           ValorTotal = s.TotalPrice,
-                                           Quantidade = s.Quantity,
+                                           UnitPrice = s.UnitPrice,
+                                           TotalPrice = s.TotalPrice,
+                                           Quantity = s.Quantity,
                                            ProductId = p.Id,
                                            ProductName = p.Name,
                                            UrlImage = p.UrlImage
@@ -67,7 +67,7 @@ namespace ApiECommerce.Controllers
                         ProductId = basketItem.ProductId,
                         UnitPrice = basketItem.UnitPrice,
                         Quantity = basketItem.Quantity,
-                        TotalPrice = (product.Price) * (basketItem.Quantity)
+                        TotalPrice = (basketItem.UnitPrice) * (basketItem.Quantity)
                     };
                     dbContext.BasketItems.Add(basket);
                 }

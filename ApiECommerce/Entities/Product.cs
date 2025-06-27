@@ -6,8 +6,6 @@ namespace ApiECommerce.Entities
 {
     public class Product
     {
-        
-
         public int Id { get; set; }
 
         [StringLength(100)]

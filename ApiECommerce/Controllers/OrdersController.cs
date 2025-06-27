@@ -27,11 +27,11 @@ namespace ApiECommerce.Controllers
                                         select new
                                         {
                                             Id = orderDetail.Id,
-                                            Quantidade = orderDetail.Quantity,
+                                            Quantity = orderDetail.Quantity,
                                             SubTotal = orderDetail.TotalPrice,
-                                            ProdutoNome = product.Name,
-                                            ProdutoImagem = product.UrlImage,
-                                            ProdutoPreco = product.Price
+                                            ProductName = product.Name,
+                                            ProductImage = product.UrlImage,
+                                            ProductPrice = product.Price
                                         }).ToListAsync();
 
             if (orderDetails == null || orderDetails.Count == 0)
@@ -43,27 +43,29 @@ namespace ApiECommerce.Controllers
         }
 
         [HttpGet("[action]/{userId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> OrdersByUser(int userId)
         {
-            var orders = await (from order in dbContext.Orders
-                                 where order.UserId == userId
-                                 orderby order.OrderDate descending
-                                 select new
-                                 {
-                                     Id = order.Id,
-                                     PedidoTotal = order.TotalAmount,
-                                     DataPedido = order.OrderDate,
-                                 }).ToListAsync();
+            var orders = await dbContext.Orders
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .Select(o => new
+                {
+                    o.Id,
+                    o.OrderDate,
+                    OrderTotal = dbContext.OrderDetails
+                                          .Where(od => od.OrderId == o.Id)
+                                          .Sum(od => od.TotalPrice)
+                })
+                .ToListAsync();
 
             if (orders is null || orders.Count == 0)
-            {
-                return NotFound("No orders where found for this user");
-            }
+                return NotFound("No orders found for this user");
 
             return Ok(orders);
         }
+
+
+
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
