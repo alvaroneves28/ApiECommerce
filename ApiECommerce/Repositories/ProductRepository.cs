@@ -16,7 +16,7 @@ namespace ApiECommerce.Repositories
         
         public async Task<IEnumerable<Product>> GetMostSoldProductsAsync()
         {
-            return await _dbContext.Products
+            return await _dbContext.Products.AsNoTracking()
                 .Where(p => p.MostSold && p.Available)
                 .ToListAsync();
         }
@@ -24,7 +24,7 @@ namespace ApiECommerce.Repositories
         
         public async Task<IEnumerable<Product>> GetPopularProductsAsync()
         {
-            return await _dbContext.Products
+            return await _dbContext.Products.AsNoTracking()
                 .Where(p => p.Popular && p.Available)
                 .ToListAsync();
         }
@@ -32,7 +32,7 @@ namespace ApiECommerce.Repositories
        
         public async Task<Product?> GetProductDetailsAsync(int id)
         {
-            return await _dbContext.Products
+            return await _dbContext.Products.AsNoTracking()
                 .Include(p => p.OrderDetails)     
                 .Include(p => p.BasketItems)
                 .FirstOrDefaultAsync(p => p.Id == id);
@@ -41,7 +41,7 @@ namespace ApiECommerce.Repositories
       
         public async Task<IEnumerable<Product>> GetProductsPerCategoryAsync(int categoryId)
         {
-            return await _dbContext.Products
+            return await _dbContext.Products.AsNoTracking()
                 .Where(p => p.CategoryId == categoryId && p.Available)
                 .ToListAsync();
         }

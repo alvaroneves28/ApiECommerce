@@ -1,4 +1,5 @@
 ﻿using ApiECommerce.Context;
+using ApiECommerce.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,21 +21,22 @@ namespace ApiECommerce.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> OrderDetails(int orderId)
         {
-            var orderDetails = await (from orderDetail in dbContext.OrderDetails
-                                        join order in dbContext.Orders on orderDetail.OrderId equals order.Id
-                                        join product in dbContext.Products on orderDetail.ProductId equals product.Id
-                                        where orderDetail.OrderId == orderId
-                                        select new
-                                        {
-                                            Id = orderDetail.Id,
-                                            Quantity = orderDetail.Quantity,
-                                            SubTotal = orderDetail.TotalPrice,
-                                            ProductName = product.Name,
-                                            ProductImage = product.UrlImage,
-                                            ProductPrice = product.Price
-                                        }).ToListAsync();
+            var orderDetails = await dbContext.OrderDetails
+                .AsNoTracking()
+                .Include(od => od.Product) 
+                .Where(od => od.OrderId == orderId)
+                .Select(orderDetail => new
+                {
+                    Id = orderDetail.Id,
+                    Quantity = orderDetail.Quantity,
+                    SubTotal = orderDetail.TotalPrice,
+                    ProductName = orderDetail.Product.Name,
+                    ProductImage = orderDetail.Product.UrlImage,
+                    ProductPrice = orderDetail.Product.Price
+                })
+                .ToListAsync();
 
-            if (orderDetails == null || orderDetails.Count == 0)
+            if (!orderDetails.Any())
             {
                 return NotFound("Order details not found.");
             }
@@ -46,6 +48,7 @@ namespace ApiECommerce.Controllers
         public async Task<IActionResult> OrdersByUser(int userId)
         {
             var orders = await dbContext.Orders
+                .AsNoTracking() // <--- Aqui
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .Select(o => new
@@ -53,6 +56,7 @@ namespace ApiECommerce.Controllers
                     o.Id,
                     o.OrderDate,
                     OrderTotal = dbContext.OrderDetails
+                                          .AsNoTracking()
                                           .Where(od => od.OrderId == o.Id)
                                           .Sum(od => od.TotalPrice)
                 })

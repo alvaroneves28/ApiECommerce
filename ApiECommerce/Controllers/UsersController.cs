@@ -75,7 +75,9 @@ namespace ApiECommerce.Controllers
                 { "accesstoken", jwt },
                 { "tokentype", "bearer" },
                 { "userid", actualUser.Id },
-                { "username", actualUser.Name }
+                { "username", actualUser.Name },
+                { "email", actualUser.Email },
+                { "contact", actualUser.Contact }
             });
         }
 
